@@ -63,7 +63,7 @@ int main() {
 		0.5f, 0.5f, 0.0f	, 1.0f, 0.0f, 0.0f	, 1.0f, 1.0f,
 		0.5f, -0.5f, 0.0f	, 0.0f, 1.0f, 0.0f	, 1.0f, 0.0f,
 		-0.5f, -0.5f, 0.0f	, 0.0f, 0.0f, 1.0f	, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f	, 0.0f, 0.0f, 0.0f	, 0.0f, 1.0f,
+		-0.5f, 0.5f, 0.0f	, 1.0f, 1.0f, 1.0f	, 0.0f, 1.0f,
 	};
 
 	unsigned int indicies[]
@@ -71,21 +71,6 @@ int main() {
 		0, 1, 3,
 		1, 2, 3
 	};
-
-	int width, height, ColorChannelNumber;
-	unsigned char* data = stbi_load("Textures\\Wood_Container.jpg", &width, &height, &ColorChannelNumber, 0);
-
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-
-	stbi_image_free(data);
 
 	//Create Array of Vertex Buffers
 	unsigned int VertexArrayObject;
@@ -118,6 +103,35 @@ int main() {
 	// Texture
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	int width, height, ColorChannelNumber;
+
+	glActiveTexture(GL_TEXTURE0);
+	unsigned char* data = stbi_load("Textures\\Wood_Container.jpg", &width, &height, &ColorChannelNumber, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);
+
+	unsigned int texture2;
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	int width2, height2, ColorChannelNumber2;
+
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data2 = stbi_load("Textures\\awesomeface.png", &width2, &height2, &ColorChannelNumber2, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data2);
+
+	glUseProgram(shaderProgram);
+
+	glUniform1i(glGetUniformLocation(shaderProgram, "Texture1"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram, "Texture2"), 1);
+
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -131,10 +145,14 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
-
+		glActiveTexture(GL_TEXTURE);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
 		glBindVertexArray(VertexArrayObject);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glUseProgram(shaderProgram);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
