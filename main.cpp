@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -35,13 +37,13 @@ int main() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	Shader Shader1("VertexShader.txt", 'V');
+	Shader Shader1("Shaders\\VertexShader.txt", 'V');
 	if (!Shader1.Compile())
 	{
 		return - 1;
 	}
 
-	Shader Shader2("FragmentShader.txt", 'F');
+	Shader Shader2("Shaders\\FragmentShader.txt", 'F');
 	if (!Shader2.Compile())
 	{
 		return -1;
@@ -58,10 +60,10 @@ int main() {
 	//END Shader Section
 
 	float vertices[] = {
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.5f, 0.5f, 0.0f	, 1.0f, 0.0f, 0.0f	, 1.0f, 1.0f,
+		0.5f, -0.5f, 0.0f	, 0.0f, 1.0f, 0.0f	, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f	, 0.0f, 0.0f, 1.0f	, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.0f	, 0.0f, 0.0f, 0.0f	, 0.0f, 1.0f,
 	};
 
 	unsigned int indicies[]
@@ -69,6 +71,21 @@ int main() {
 		0, 1, 3,
 		1, 2, 3
 	};
+
+	int width, height, ColorChannelNumber;
+	unsigned char* data = stbi_load("Textures\\Wood_Container.jpg", &width, &height, &ColorChannelNumber, 0);
+
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+
+	stbi_image_free(data);
 
 	//Create Array of Vertex Buffers
 	unsigned int VertexArrayObject;
@@ -93,12 +110,17 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
-	// Read from position 0, Expect 3 floats, Do not normalize, each vertex attribute is 3 * size of a float, no offset
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Read from position 0, Expect 3 floats, Do not normalize, each stride is 8 floats long, no offset
+	// Vertex
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	// Color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	// Texture
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 

@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Nick\Desktop\OpenGlGrpahicEngine\Includes;C:\Users\Nick\Desktop\OpenGlGrpahicEngine\OPENGLGrpahicsEngine;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Nick\Desktop\OpenGlGrpahicEngine\Includes;C:\Users\Nick\Desktop\OpenGlGrpahicEngine\OPENGLGrpahicsEngine;C:\Users\Nick\Desktop\OpenGlGrpahicEngine\OpenGL_Graphics\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Nick\Desktop\OpenGlGrpahicEngine\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -136,7 +136,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ShaderHelper.hpp" />
+    <ClInclude Include="Includes\ShaderHelper.hpp" />
+    <ClInclude Include="Includes\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
