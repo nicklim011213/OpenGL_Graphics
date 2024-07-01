@@ -4,6 +4,9 @@
 #include <iostream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -31,24 +34,90 @@ int main() {
 		return -1;
 	}
 
-	glViewport(0, 0, 1920, 1080);
-
-	// Used to allow transparency
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
 
 	Shader Shader1("Shaders\\VertexShader.txt", 'V');
-	if (!Shader1.Compile())
-	{
-		return - 1;
-	}
+	Shader1.Compile();
 
 	Shader Shader2("Shaders\\FragmentShader.txt", 'F');
-	if (!Shader2.Compile())
-	{
-		return -1;
-	}
+	Shader2.Compile();
 
+	float vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	glm::vec3 cubePositions[] = {
+	glm::vec3(0.0f,  0.0f,  0.0f),
+	glm::vec3(2.0f,  5.0f, -15.0f),
+	glm::vec3(-1.5f, -2.2f, -2.5f),
+	glm::vec3(-3.8f, -2.0f, -12.3f),
+	glm::vec3(2.4f, -0.4f, -3.5f),
+	glm::vec3(-1.7f,  3.0f, -7.5f),
+	glm::vec3(1.3f, -2.0f, -2.5f),
+	glm::vec3(1.5f,  2.0f, -2.5f),
+	glm::vec3(1.5f,  0.2f, -1.5f),
+	glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	//Start vertex and Attribute Section
+	unsigned int VertexArrayObject, VertexBufferObject;
+	glGenVertexArrays(1, &VertexArrayObject);
+	glGenBuffers(1, &VertexBufferObject);
+
+	glBindVertexArray(VertexArrayObject);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Vertex
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// Texture
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	//END vertex and Attribute Section
+
+	//Start Shader section
 	unsigned int shaderProgram;
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, Shader1.ShaderResult);
@@ -59,100 +128,71 @@ int main() {
 	glDeleteShader(Shader2.ShaderResult);
 	//END Shader Section
 
-	float vertices[] = {
-		0.5f, 0.5f, 0.0f	, 1.0f, 0.0f, 0.0f	, 1.0f, 1.0f,
-		0.5f, -0.5f, 0.0f	, 0.0f, 1.0f, 0.0f	, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f	, 0.0f, 0.0f, 1.0f	, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f	, 1.0f, 1.0f, 1.0f	, 0.0f, 1.0f,
-	};
-
-	unsigned int indicies[]
-	{
-		0, 1, 3,
-		1, 2, 3
-	};
-
-	//Create Array of Vertex Buffers
-	unsigned int VertexArrayObject;
-	glGenVertexArrays(1, &VertexArrayObject);
-
-	// Create Indidvidual Vertex Buffer
-	unsigned int VertexBufferObject;
-	glGenBuffers(1, &VertexBufferObject);
-
-	// Create a Vertex Index Buffer Combo (A.K.A ElementBufferObject)
-	unsigned int ElementBufferObject;
-	glGenBuffers(1, &ElementBufferObject);
-
-	//Bind the Array
-	glBindVertexArray(VertexArrayObject);
-
-	//Bind the Vertex Buffer and pass its data
-	glBindBuffer(GL_ARRAY_BUFFER, VertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	//Bind the Element Buffer and pass along its data
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementBufferObject);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-	// Read from position 0, Expect 3 floats, Do not normalize, each stride is 8 floats long, no offset
-	// Vertex
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	// Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	// Texture
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-	unsigned int texture;
+	//Start texture section
+	unsigned int texture, texture2;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	int width, height, ColorChannelNumber;
 
-	glActiveTexture(GL_TEXTURE0);
 	unsigned char* data = stbi_load("Textures\\Wood_Container.jpg", &width, &height, &ColorChannelNumber, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
 	stbi_image_free(data);
 
-	unsigned int texture2;
 	glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
-	int width2, height2, ColorChannelNumber2;
-
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data2 = stbi_load("Textures\\awesomeface.png", &width2, &height2, &ColorChannelNumber2, 0);
+		
+	unsigned char* data2 = stbi_load("Textures\\awesomeface.png", &width, &height, &ColorChannelNumber, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
 	stbi_image_free(data2);
+	//END texture section
 
 	glUseProgram(shaderProgram);
-
 	glUniform1i(glGetUniformLocation(shaderProgram, "Texture1"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram, "Texture2"), 1);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
-		glBindVertexArray(VertexArrayObject);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glUseProgram(shaderProgram);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 projection = glm::mat4(1.0f);
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+		// note that we're translating the scene in the reverse direction of where we want to move
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
+		int modelLoc = glGetUniformLocation(shaderProgram, "model");
+		int viewLoc = glGetUniformLocation(shaderProgram, "view");
+		int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		glBindVertexArray(VertexArrayObject);
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
